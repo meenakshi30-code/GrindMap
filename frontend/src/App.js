@@ -3,9 +3,11 @@ import './App.css';
 import CircularProgress from './components/CircularProgress';
 import ActivityHeatmap from './components/ActivityHeatmap';
 import DemoPage from './components/DemoPage';
+import AnalyticsDashboard from './components/AnalyticsDashboard';
 
 function App() {
   const [showDemo, setShowDemo] = useState(false);
+  const [showAnalytics, setShowAnalytics] = useState(false);
   const [usernames, setUsernames] = useState({
     leetcode: '',
     codeforces: '',
@@ -141,10 +143,16 @@ function App() {
           <button onClick={() => setShowDemo(false)} className="back-btn">← Back to Main</button>
           <DemoPage />
         </>
+      ) : showAnalytics ? (
+        <>
+          <button onClick={() => setShowAnalytics(false)} className="back-btn">← Back to Main</button>
+          <AnalyticsDashboard platformData={platformData} />
+        </>
       ) : (
         <>
           <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-            <button onClick={() => setShowDemo(true)} style={{ padding: '10px 20px', fontSize: '1em', background: '#667eea', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>View Demo</button>
+            <button onClick={() => setShowDemo(true)} style={{ padding: '10px 20px', fontSize: '1em', background: '#667eea', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', marginRight: '10px' }}>View Demo</button>
+            <button onClick={() => setShowAnalytics(true)} style={{ padding: '10px 20px', fontSize: '1em', background: '#4caf50', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>View Analytics</button>
           </div>
           <h1>GrindMap</h1>
 
