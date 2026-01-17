@@ -1,6 +1,6 @@
-export function normalizeCodeforces(data) {
+export function normalizeCodeChef(data) {
   return {
-    platform: "codeforces",
+    platform: "codechef",
     username: data.username,
     stats: {
       totalSolved: data.totalSolved,
