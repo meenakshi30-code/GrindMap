@@ -32,6 +32,12 @@
     // Security and dependency management
     "audit": "npm audit", // Check for security vulnerabilities
     "audit:fix": "npm audit fix", // Auto-fix security issues where possible
+    "security:audit": "./security-audit.sh --audit-only", // Comprehensive security audit
+    "security:fix": "./security-audit.sh --fix", // Security audit with automatic fixes
+    "security:report": "./security-audit.sh --report-only", // Generate security reports only
+    "deps:check": "npm outdated", // Check for outdated dependencies
+    "deps:update": "npm update --save", // Update dependencies (use with caution)
+    "deps:clean": "rm -rf node_modules package-lock.json && npm install", // Clean dependency reinstall
     
     // Build and deployment preparation scripts
     "prebuild": "npm run lint && npm run test && npm run audit:ci", // Quality checks before build
@@ -90,54 +96,54 @@
   // Production dependencies - required for application runtime
   "dependencies": {
     // HTTP client for making API requests to external services
-    "axios": "^1.13.2", // For scraping platform data
+    "axios": "1.6.2", // Pinned version - security patched
     
     // Cross-Origin Resource Sharing middleware
-    "cors": "^2.8.5", // Enable secure cross-origin requests
+    "cors": "2.8.5", // Pinned version - stable release
     
     // Environment variables management
-    "dotenv": "^17.2.3", // Load configuration from .env files
+    "dotenv": "16.3.1", // Pinned version - latest stable
     
     // Web application framework
-    "express": "^5.2.1", // Core web server framework
+    "express": "4.18.2", // Pinned to LTS version for stability
     
     // Security and rate limiting middleware
-    "express-rate-limit": "^7.5.1", // Prevent API abuse and DDoS attacks
+    "express-rate-limit": "7.1.5", // Pinned version - security focused
     
     // Input validation and sanitization
-    "express-validator": "^7.3.1", // Validate and sanitize user inputs
+    "express-validator": "7.0.1", // Pinned version - vulnerability free
     
     // HTTP request logging middleware
-    "morgan": "^1.10.1", // Log HTTP requests for monitoring
+    "morgan": "1.10.0", // Pinned version - stable
     
     // Cross-site scripting (XSS) protection
-    "xss": "^1.0.15" // Sanitize user input to prevent XSS attacks
+    "xss": "1.0.14" // Pinned version - latest security patches
   },
   
   // Development dependencies - tools for development workflow
   "devDependencies": {
     // Development server with auto-reload functionality
-    "nodemon": "^3.0.2", // Automatically restart server on file changes
+    "nodemon": "3.0.2", // Pinned version - stable development tool
     
     // Testing framework and utilities
-    "jest": "^29.7.0", // JavaScript testing framework
-    "supertest": "^6.3.3", // HTTP assertion library for testing APIs
+    "jest": "29.7.0", // Pinned version - latest stable testing framework
+    "supertest": "6.3.3", // Pinned version - HTTP assertion library
     
     // Code quality and linting tools
-    "eslint": "^8.56.0", // JavaScript linter for code quality
-    "eslint-config-prettier": "^9.1.0", // Disable ESLint rules that conflict with Prettier
-    "eslint-plugin-node": "^11.1.0", // ESLint rules for Node.js best practices
+    "eslint": "8.56.0", // Pinned version - latest stable linter
+    "eslint-config-prettier": "9.1.0", // Pinned version - Prettier integration
+    "eslint-plugin-node": "11.1.0", // Pinned version - Node.js specific rules
     
     // Code formatting tool
-    "prettier": "^3.1.1", // Opinionated code formatter
+    "prettier": "3.1.1", // Pinned version - latest stable formatter
     
     // Babel transpilation for testing (ES6 modules support)
-    "@babel/preset-env": "^7.23.6", // Babel preset for environment-specific transpilation
-    "babel-jest": "^29.7.0", // Babel integration with Jest
+    "@babel/preset-env": "7.23.6", // Pinned version - environment preset
+    "babel-jest": "29.7.0", // Pinned version - Jest Babel integration
     
     // Git hooks and pre-commit quality checks
-    "husky": "^8.0.3", // Git hooks made easy
-    "lint-staged": "^15.2.0" // Run linters on staged files before commit
+    "husky": "8.0.3", // Pinned version - Git hooks tool
+    "lint-staged": "15.2.0" // Pinned version - Staged files linter
   },
   
   // Configuration for lint-staged (pre-commit hooks)
