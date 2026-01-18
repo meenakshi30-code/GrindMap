@@ -7,6 +7,8 @@ import { securityHeaders } from './middlewares/security.middleware.js';
 import { requestLogger, securityMonitor } from './middlewares/logging.middleware.js';
 import { sanitizeInput } from './middlewares/validation.middleware.js';
 import { generalLimiter } from './middlewares/rateLimiter.middleware.js';
+import { correlationId } from './middlewares/correlationId.middleware.js';
+import { performanceMetrics } from './middlewares/performance.middleware.js';
 
 // Import routes
 import scrapeRoutes from './routes/scrape.routes.js';
@@ -14,6 +16,7 @@ import authRoutes from './routes/auth.routes.js';
 
 // Import constants
 import { HTTP_STATUS, ENVIRONMENTS } from './constants/app.constants.js';
+import Logger from './utils/logger.js';
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -22,7 +25,11 @@ const NODE_ENV = process.env.NODE_ENV || ENVIRONMENTS.DEVELOPMENT;
 // Connect to database
 connectDB();
 
-// Security middleware (applied first)
+// Request tracking and monitoring (first)
+app.use(correlationId);
+app.use(performanceMetrics);
+
+// Security middleware
 app.use(securityHeaders);
 app.use(requestLogger);
 app.use(securityMonitor);
@@ -42,11 +49,14 @@ app.use(sanitizeInput);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
+  Logger.info('Health check accessed', { correlationId: req.correlationId });
+  
   res.status(HTTP_STATUS.OK).json({
     success: true,
     message: 'Server is healthy',
     timestamp: new Date().toISOString(),
     environment: NODE_ENV,
+    correlationId: req.correlationId
   });
 });
 
@@ -65,6 +75,7 @@ app.get('/api', (req, res) => {
       authentication: '/api/auth',
       health: '/health',
     },
+    correlationId: req.correlationId
   });
 });
 
@@ -76,30 +87,36 @@ app.use(errorHandler);
 
 // Global error handlers for unhandled promises and exceptions
 process.on('unhandledRejection', (err) => {
-  console.error('🚨 Unhandled Promise Rejection:', err.message);
-  console.error('Stack:', err.stack);
+  Logger.error('Unhandled Promise Rejection', {
+    error: err.message,
+    stack: err.stack
+  });
   process.exit(1);
 });
 
 process.on('uncaughtException', (err) => {
-  console.error('🚨 Uncaught Exception:', err.message);
-  console.error('Stack:', err.stack);
+  Logger.error('Uncaught Exception', {
+    error: err.message,
+    stack: err.stack
+  });
   process.exit(1);
 });
 
 // Graceful shutdown handler
 process.on('SIGTERM', () => {
-  console.log('👋 SIGTERM received. Shutting down gracefully...');
+  Logger.info('SIGTERM received. Shutting down gracefully...');
   server.close(() => {
-    console.log('✅ Process terminated');
+    Logger.info('Process terminated');
   });
 });
 
 // Start server
 const server = app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📊 Environment: ${NODE_ENV}`);
-  console.log(`🔗 Health check: http://localhost:${PORT}/health`);
+  Logger.info('Server started', {
+    port: PORT,
+    environment: NODE_ENV,
+    healthCheck: `http://localhost:${PORT}/health`
+  });
 });
 
 export default app;

@@ -1,8 +1,8 @@
 import { HTTP_STATUS, ENVIRONMENTS } from '../constants/app.constants.js';
+import Logger from '../utils/logger.js';
 
 /**
- * Enhanced error handler with security considerations
- * Prevents information leakage in production
+ * Enhanced error handler with structured logging
  */
 const errorHandler = (err, req, res, next) => {
   let { statusCode = HTTP_STATUS.INTERNAL_SERVER_ERROR, message, errorCode = 'SERVER_ERROR' } = err;
@@ -17,7 +17,6 @@ const errorHandler = (err, req, res, next) => {
   if (err.code === 11000) {
     statusCode = HTTP_STATUS.BAD_REQUEST;
     errorCode = 'DUPLICATE_FIELD';
-    // Don't expose which field is duplicated in production
     message = process.env.NODE_ENV === ENVIRONMENTS.PRODUCTION 
       ? 'Duplicate field value' 
       : `Duplicate field: ${Object.keys(err.keyValue).join(', ')}`;
@@ -41,19 +40,31 @@ const errorHandler = (err, req, res, next) => {
     message = 'Invalid resource ID';
   }
 
-  // Security: Log error details but don't expose them
-  console.error(`Error ${statusCode}: ${message}`);
-  if (process.env.NODE_ENV === ENVIRONMENTS.DEVELOPMENT) {
-    console.error('Stack:', err.stack);
-  }
+  // Structured error logging
+  Logger.error('Request error', {
+    correlationId: req.correlationId,
+    error: {
+      message: err.message,
+      statusCode,
+      errorCode,
+      stack: process.env.NODE_ENV === ENVIRONMENTS.DEVELOPMENT ? err.stack : undefined
+    },
+    request: {
+      method: req.method,
+      url: req.originalUrl,
+      ip: req.ip,
+      userAgent: req.get('User-Agent')
+    }
+  });
 
-  // Security: Never expose stack traces or internal details in production
+  // Send standardized error response
   const response = {
     success: false,
     message: process.env.NODE_ENV === ENVIRONMENTS.PRODUCTION && statusCode >= 500 
       ? 'Internal server error' 
       : message,
     errorCode,
+    correlationId: req.correlationId
   };
 
   // Only include stack trace in development
@@ -68,10 +79,18 @@ const errorHandler = (err, req, res, next) => {
  * 404 handler for undefined routes
  */
 const notFound = (req, res, next) => {
+  Logger.warn('Route not found', {
+    correlationId: req.correlationId,
+    method: req.method,
+    url: req.originalUrl,
+    ip: req.ip
+  });
+  
   res.status(HTTP_STATUS.NOT_FOUND).json({
     success: false,
     message: `Route ${req.originalUrl} not found`,
-    errorCode: 'ROUTE_NOT_FOUND'
+    errorCode: 'ROUTE_NOT_FOUND',
+    correlationId: req.correlationId
   });
 };
 
