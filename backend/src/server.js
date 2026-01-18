@@ -1,48 +1,36 @@
-import "dotenv/config";
-import express from "express";
-import cors from "cors";
-import mongoose from "mongoose";
+import express from 'express';
+import cors from 'cors';
+import { corsOptions } from './config/cors.js';
+import { scrapeLeetCode } from './services/scraping/leetcode.scraper.js';
 
-import { scrapeLeetCode } from "./services/scraping/leetcode.scraper.js";
+import { fetchCodeforcesStats } from './services/scraping/codeforces.scraper.js';
+import { fetchCodeChefStats } from './services/scraping/codechef.scraper.js';
+import { normalizeCodeforces } from './services/normalization/codeforces.normalizer.js';
+import { normalizeCodeChef } from './services/normalization/codechef.normalizer.js';
 
-import { fetchCodeforcesStats } from "./services/scraping/codeforces.scraper.js";
-import { fetchCodeChefStats } from "./services/scraping/codechef.scraper.js";
-import { normalizeCodeforces } from "./services/normalization/codeforces.normalizer.js";
-import { normalizeCodeChef } from "./services/normalization/codechef.normalizer.js";
-
-import { backpressureManager } from "./utils/backpressure.util.js";
-import { rateLimiter } from "./utils/rateLimiter.util.js";
-import { memoryMonitor } from "./middlewares/memory.middleware.js";
-import { validate, sanitize } from "./middlewares/validation.middleware.js";
-import { errorHandler } from "./middlewares/error.middleware.js";
-import { tracingMiddleware } from "./middlewares/tracing.middleware.js";
-import { withTrace } from "./utils/serviceTracer.util.js";
-import { traceRoutes } from "./routes/trace.routes.js";
-import { gracefulShutdown } from "./utils/shutdown.util.js";
+import { backpressureManager } from './utils/backpressure.util.js';
+import { rateLimiter } from './utils/rateLimiter.util.js';
+import { memoryMonitor } from './middlewares/memory.middleware.js';
+import { validate, sanitize } from './middlewares/validation.middleware.js';
+import { errorHandler } from './middlewares/error.middleware.js';
+import { tracingMiddleware } from './middlewares/tracing.middleware.js';
+import { withTrace } from './utils/serviceTracer.util.js';
+import { traceRoutes } from './routes/trace.routes.js';
+import { gracefulShutdown } from './utils/shutdown.util.js';
 
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// 🔗 MongoDB connection
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB connected"))
-  .catch((err) => console.error("MongoDB connection error:", err));
+app.use(cors(corsOptions));
+app.use(express.json({ limit: '10mb' }));
 
-app.use(cors());
-app.use(express.json({ limit: "1mb" }));
-app.use(tracingMiddleware);
-app.use(sanitize);
-app.use(rateLimiter(20, 60000));
-app.use(memoryMonitor);
-
-// Trace routes
-traceRoutes(app);
-
-// Health check endpoint
-app.get("/health", (req, res) => {
-  const stats = backpressureManager.getStats();
-  res.json({ status: "ok", traceId: req.traceId, ...stats });
+app.get('/api/leetcode/:username', async (req, res) => {
+  try {
+    const data = await scrapeLeetCode(req.params.username);
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 /**
