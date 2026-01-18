@@ -1,0 +1,56 @@
+# Docker Compose configuration for GrindMap Backend
+version: '3.8'
+
+services:
+  # Backend API service
+  backend:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: grindmap-backend
+    ports:
+      - "5001:5001"
+    environment:
+      - NODE_ENV=production
+      - PORT=5001
+    volumes:
+      # Mount logs directory for persistent logging
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - grindmap-network
+
+  # Development service (alternative to production)
+  backend-dev:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: grindmap-backend-dev
+    ports:
+      - "5001:5001"
+    environment:
+      - NODE_ENV=development
+      - PORT=5001
+    volumes:
+      # Mount source code for development
+      - .:/app
+      - /app/node_modules
+    command: npm run dev
+    profiles:
+      - dev
+    networks:
+      - grindmap-network
+
+networks:
+  grindmap-network:
+    driver: bridge
+
+volumes:
+  logs:
+    driver: local
