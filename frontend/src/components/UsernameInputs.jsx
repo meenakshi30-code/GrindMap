@@ -1,27 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 const PLATFORM_CONFIG = {
   leetcode: {
-    name: 'LeetCode',
-    placeholder: 'e.g. tourist',
-    urlPart: 'leetcode.com/',
-    regex: /^[a-zA-Z0-9_.-]+$/
+    name: "LeetCode",
+    placeholder: "e.g. tourist",
+    urlPart: "leetcode.com/",
+    regex: /^[a-zA-Z0-9_.-]+$/,
   },
   codeforces: {
-    name: 'Codeforces',
-    placeholder: 'e.g. tourist',
-    urlPart: 'codeforces.com/profile/',
-    regex: /^[a-zA-Z0-9_.-]+$/
+    name: "Codeforces",
+    placeholder: "e.g. tourist",
+    urlPart: "codeforces.com/profile/",
+    regex: /^[a-zA-Z0-9_.-]+$/,
   },
   codechef: {
-    name: 'CodeChef',
-    placeholder: 'e.g. gennady',
-    urlPart: 'codechef.com/users/',
-    regex: /^[a-zA-Z0-9_.]+$/
-  }
+    name: "CodeChef",
+    placeholder: "e.g. gennady",
+    urlPart: "codechef.com/users/",
+    regex: /^[a-zA-Z0-9_.]+$/,
+  },
 };
 
-function UsernameInputs({ usernames, setUsernames, onFetch, loading }) {
+function UsernameInputs({ usernames, onChange, onFetch, loading }) {
   const [errors, setErrors] = useState({});
 
   const validateAndChange = (platform, value) => {
@@ -29,7 +29,12 @@ function UsernameInputs({ usernames, setUsernames, onFetch, loading }) {
     let error = null;
 
     // URL Handling
-    if (newValue.includes('http') || newValue.includes('www.') || newValue.includes('.com') || newValue.includes('.jp')) {
+    if (
+      newValue.includes("http") ||
+      newValue.includes("www.") ||
+      newValue.includes(".com") ||
+      newValue.includes(".jp")
+    ) {
       // try extract
       const config = PLATFORM_CONFIG[platform];
       // Match strict part
@@ -38,9 +43,9 @@ function UsernameInputs({ usernames, setUsernames, onFetch, loading }) {
         try {
           // Basic split logic
           const afterDomain = lowerValue.split(config.urlPart)[1];
-          newValue = afterDomain.split('/')[0].split('?')[0]; // simple extraction
+          newValue = afterDomain.split("/")[0].split("?")[0]; // simple extraction
         } catch (e) {
-          error = 'Invalid URL format';
+          error = "Invalid URL format";
         }
       } else {
         error = `Not a valid ${config.name} URL`;
@@ -51,21 +56,21 @@ function UsernameInputs({ usernames, setUsernames, onFetch, loading }) {
     if (!error && newValue) {
       const config = PLATFORM_CONFIG[platform];
       if (config.regex && !config.regex.test(newValue)) {
-        error = 'Invalid username format';
+        error = "Invalid username format";
       }
     }
 
-    setErrors(prev => ({ ...prev, [platform]: error }));
-    setUsernames(prev => ({ ...prev, [platform]: newValue }));
+    setErrors((prev) => ({ ...prev, [platform]: error }));
+    onChange(platform, newValue);
   };
 
   const handleFetch = () => {
     // Check for blocking errors
-    const hasErrors = Object.values(errors).some(e => e);
+    const hasErrors = Object.values(errors).some((e) => e);
     // basic check: at least one username should probably be present, but user request only said "Prevent ... if input field is empty"
     // Assuming this means "don't fetch for empty fields" which App.js already does.
     // But if ALL are empty, maybe warn?
-    const allEmpty = Object.keys(PLATFORM_CONFIG).every(k => !usernames[k]);
+    const allEmpty = Object.keys(PLATFORM_CONFIG).every((k) => !usernames[k]);
 
     if (hasErrors) {
       return; // Button should be disabled or we just return.
@@ -77,36 +82,43 @@ function UsernameInputs({ usernames, setUsernames, onFetch, loading }) {
     onFetch();
   };
 
-  const hasErrors = Object.values(errors).some(e => e);
-  const allEmpty = Object.keys(PLATFORM_CONFIG).every(k => !usernames[k]);
+  const hasErrors = Object.values(errors).some((e) => e);
+  const allEmpty = Object.keys(PLATFORM_CONFIG).every((k) => !usernames[k]);
 
   return (
     <div className="username-inputs">
       <h2>Enter Your Usernames</h2>
-      {Object.keys(PLATFORM_CONFIG).map(key => {
+      {Object.keys(PLATFORM_CONFIG).map((key) => {
         const config = PLATFORM_CONFIG[key];
         return (
-          <div key={key} className="input-group" style={{ alignItems: 'flex-start' }}>
-            <label style={{ marginTop: '12px' }}>{config.name}</label>
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <div
+            key={key}
+            className="input-group"
+            style={{ alignItems: "flex-start" }}
+          >
+            <label style={{ marginTop: "12px" }}>{config.name}</label>
+            <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
               <input
                 type="text"
                 value={usernames[key]}
                 onChange={(e) => validateAndChange(key, e.target.value)}
                 placeholder={config.placeholder}
                 style={{
-                  borderColor: errors[key] ? '#ef4444' : undefined,
-                  outlineColor: errors[key] ? '#ef4444' : undefined
+                  borderColor: errors[key] ? "#ef4444" : undefined,
+                  outlineColor: errors[key] ? "#ef4444" : undefined,
                 }}
               />
               {errors[key] && (
-                <span className="error-msg" style={{
-                  color: '#ef4444',
-                  fontSize: '0.9em',
-                  marginTop: '5px',
-                  marginBottom: '10px',
-                  textAlign: 'left'
-                }}>
+                <span
+                  className="error-msg"
+                  style={{
+                    color: "#ef4444",
+                    fontSize: "0.9em",
+                    marginTop: "5px",
+                    marginBottom: "10px",
+                    textAlign: "left",
+                  }}
+                >
                   {errors[key]}
                 </span>
               )}
@@ -118,9 +130,9 @@ function UsernameInputs({ usernames, setUsernames, onFetch, loading }) {
         onClick={handleFetch}
         disabled={loading || hasErrors || allEmpty}
         className="refresh-btn"
-        style={{ opacity: (loading || hasErrors || allEmpty) ? 0.6 : 1 }}
+        style={{ opacity: loading || hasErrors || allEmpty ? 0.6 : 1 }}
       >
-        {loading ? 'Loading...' : 'Refresh All'}
+        {loading ? "Loading..." : "Refresh All"}
       </button>
     </div>
   );
