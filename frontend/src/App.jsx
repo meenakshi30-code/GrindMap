@@ -6,7 +6,6 @@ import DemoPage from "./components/DemoPage";
 import AnalyticsDashboard from "./components/AnalyticsDashboard";
 import BadgeCollection from "./components/BadgeCollection";
 import GoalDashboard from "./components/GoalDashboard";
-import ThemeToggle from "./components/ThemeToggle";
 import UsernameInputs from "./components/UsernameInputs";
 import PlatformCard from "./components/PlatformCard";
 import { ThemeProvider } from "./contexts/ThemeContext";

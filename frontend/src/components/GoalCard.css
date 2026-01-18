@@ -71,15 +71,15 @@
 }
 
 .goal-priority.priority-high {
-  background-color: var(--theme-error);
+  background-color: #F44336;
 }
 
 .goal-priority.priority-medium {
-  background-color: var(--theme-warning);
+  background-color: #FF9800;
 }
 
 .goal-priority.priority-low {
-  background-color: var(--theme-success);
+  background-color: #4CAF50;
 }
 
 .goal-actions {
@@ -259,13 +259,13 @@
 
 .progress-input:focus {
   outline: none;
-  border-color: var(--theme-primary);
+  border-color: #2196F3;
   box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
 }
 
 .update-btn {
   padding: 8px 16px;
-  background: var(--theme-primary);
+  background: #2196F3;
   color: white;
   border: none;
   border-radius: 6px;
@@ -275,7 +275,7 @@
 }
 
 .update-btn:hover {
-  background: var(--theme-secondary);
+  background: #1976D2;
   transform: scale(1.02);
 }
 
@@ -410,16 +410,4 @@
   .progress-input {
     margin-bottom: 8px;
   }
-}
-
-.goal-completed-banner {
-  background: linear-gradient(45deg, var(--theme-success), #66BB6A);
-  color: white;
-  padding: 12px;
-  border-radius: 8px;
-  text-align: center;
-  font-weight: bold;
-  font-size: 1.1em;
-  margin-top: 16px;
-  box-shadow: 0 4px 12px var(--theme-shadow);
 }
