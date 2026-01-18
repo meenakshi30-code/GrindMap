@@ -6,6 +6,7 @@ import { errorHandler, notFound } from './middlewares/error.middleware.js';
 import { securityHeaders } from './middlewares/security.middleware.js';
 import { requestLogger, securityMonitor } from './middlewares/logging.middleware.js';
 import { sanitizeInput, validateUsername } from './middlewares/validation.middleware.js';
+import { generalLimiter, scrapingLimiter } from './middlewares/rateLimiter.middleware.js';
 import { asyncHandler } from './utils/asyncHandler.js';
 import { AppError } from './utils/appError.js';
 
@@ -15,11 +16,12 @@ const PORT = process.env.PORT || 5001;
 app.use(requestLogger);
 app.use(securityMonitor);
 app.use(securityHeaders);
+app.use(generalLimiter);
 app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 app.use(sanitizeInput);
 
-app.get('/api/leetcode/:username', validateUsername, asyncHandler(async (req, res) => {
+app.get('/api/leetcode/:username', scrapingLimiter, validateUsername, asyncHandler(async (req, res) => {
   const { username } = req.params;
   
   if (!username || username.trim() === '') {
